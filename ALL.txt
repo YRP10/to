@@ -1,0 +1,1246 @@
+.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.
+
+Design a distributed application using RPC for remote computation where client submits an integer value to the server and server calculates factorial and returns the result to the client program.
+
+# !pip install xmlrpc
+
+# SERVER
+from xmlrpc.server import SimpleXMLRPCServer
+import math
+
+def factorial(n):
+    if n < 0:
+        return "Error: Negative number"
+    return math.factorial(n)
+
+# Create server
+server = SimpleXMLRPCServer(("localhost", 8000), allow_none=True)
+print("🖥️ RPC Server is running on port 8000...")
+
+# Register the factorial function
+server.register_function(factorial, "compute_factorial")
+
+# Keep server running
+server.serve_forever()
+
+#CLIENT
+
+# Run this in another notebook cell or terminal
+import xmlrpc.client
+
+# Connect to the RPC server
+proxy = xmlrpc.client.ServerProxy("http://localhost:8000/")
+
+# Input value
+n = int(input("Enter a number to compute factorial: "))
+
+# Make remote call
+result = proxy.compute_factorial(n)
+
+print(f"✅ Factorial of {n} is: {result}")
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Design a distributed application using RMI for remote computation where client submits two strings to the server and server returns the concatenation of the given strings.
+
+!pip install Pyro5
+
+# concat_server.py
+import Pyro5.api
+
+@Pyro5.api.expose
+class ConcatServer:
+    def concatenate(self, str1, str2):
+        print(f"Received: '{str1}' and '{str2}'")
+        return str1 + str2
+
+def main():
+    daemon = Pyro5.server.Daemon()                # start server daemon
+    uri = daemon.register(ConcatServer)           # register object
+    print(f"Server is running. URI: {uri}")
+    daemon.requestLoop()                          # wait for requests
+
+if __name__ == "__main__":
+    main()
+
+# concat_client.py
+import Pyro5.api
+
+def main():
+    uri = input("Enter server URI (e.g., PYRO:obj_xxx@localhost:xxxx): ")
+    concat_server = Pyro5.api.Proxy(uri)
+
+    s1 = input("Enter first string: ")
+    s2 = input("Enter second string: ")
+
+    result = concat_server.concatenate(s1, s2)
+    print(f"Concatenated Result: {result}")
+
+if __name__ == "__main__":
+    main()
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Implement Union, Intersection, Complement and Difference operations on fuzzy sets. Also create fuzzy relations by Cartesian product of any two fuzzy sets and perform max-min composition on any two fuzzy relations.
+
+import numpy as np
+ 
+# Function to perform Union operation on fuzzy sets
+def fuzzy_union(A, B):
+    return np.maximum(A, B)
+ 
+# Function to perform Intersection operation on fuzzy sets
+def fuzzy_intersection(A, B):
+    return np.minimum(A, B)
+ 
+# Function to perform Complement operation on a fuzzy set
+def fuzzy_complement(A):
+    return 1 - A
+ 
+# Function to perform Difference operation on fuzzy sets
+def fuzzy_difference(A, B):
+    return np.maximum(A, 1 - B)
+ 
+# Function to create fuzzy relation by Cartesian product of two fuzzy sets
+def cartesian_product(A, B):
+    return np.outer(A, B)
+ 
+# Function to perform Max-Min composition on two fuzzy relations
+def max_min_composition(R, S):
+    return np.max(np.minimum.outer(R, S), axis=1)
+ 
+# Example usage
+A = np.array([0.2, 0.4, 0.6, 0.8])  # Fuzzy set A
+B = np.array([0.3, 0.5, 0.7, 0.9])  # Fuzzy set B
+ 
+# Operations on fuzzy sets
+union_result = fuzzy_union(A, B)
+intersection_result = fuzzy_intersection(A, B)
+complement_A = fuzzy_complement(A)
+difference_result = fuzzy_difference(A, B)
+ 
+print("Union:", union_result)
+print("Intersection:", intersection_result)
+print("Complement of A:", complement_A)
+print("Difference:", difference_result)
+ 
+# Fuzzy relations
+R = np.array([0.2, 0.5, 0.4])  # Fuzzy relation R
+S = np.array([0.6, 0.3, 0.7])  # Fuzzy relation S
+ 
+# Cartesian product of fuzzy relations
+cartesian_result = cartesian_product(R, S)
+ 
+# Max-Min composition of fuzzy relations
+composition_result = max_min_composition(R, S)
+ 
+print("Cartesian product of R and S:")
+print(cartesian_result)
+ 
+print("Max-Min composition of R and S:")
+print(composition_result)
+
+#OR###########################
+
+import numpy as np
+import pandas as pd
+
+# -----------------------------
+# 🔶 Define two fuzzy sets
+# -----------------------------
+# Format: {element: membership_value}
+A = {'a': 0.2, 'b': 0.7, 'c': 0.5}
+B = {'a': 0.6, 'b': 0.4, 'c': 0.9}
+
+universe = sorted(set(A.keys()) | set(B.keys()))
+
+# -----------------------------
+# 🔁 Fuzzy Set Operations
+# -----------------------------
+def fuzzy_union(A, B):
+    return {x: max(A.get(x, 0), B.get(x, 0)) for x in universe}
+
+def fuzzy_intersection(A, B):
+    return {x: min(A.get(x, 0), B.get(x, 0)) for x in universe}
+
+def fuzzy_complement(A):
+    return {x: 1 - A.get(x, 0) for x in universe}
+
+def fuzzy_difference(A, B):
+    return {x: min(A.get(x, 0), 1 - B.get(x, 0)) for x in universe}
+
+# -----------------------------
+# 🔗 Cartesian Product (Fuzzy Relation)
+# -----------------------------
+def cartesian_product(X, Y):
+    return {(x, y): min(X[x], Y[y]) for x in X for y in Y}
+
+# -----------------------------
+# 🔁 Max-Min Composition
+# -----------------------------
+def max_min_composition(R1, R2):
+    X = sorted(set(x for (x, y) in R1.keys()))
+    Z = sorted(set(z for (y, z) in R2.keys()))
+    Y = sorted(set(y for (x, y) in R1.keys()))
+    
+    composition = {}
+    for x in X:
+        for z in Z:
+            min_vals = [min(R1.get((x, y), 0), R2.get((y, z), 0)) for y in Y]
+            composition[(x, z)] = max(min_vals)
+    return composition
+
+# -----------------------------
+# 🧪 Demonstration
+# -----------------------------
+
+print("✅ Fuzzy Set A:", A)
+print("✅ Fuzzy Set B:", B)
+
+union = fuzzy_union(A, B)
+intersection = fuzzy_intersection(A, B)
+complement_A = fuzzy_complement(A)
+difference = fuzzy_difference(A, B)
+
+print("\n🔹 Union A ∪ B:", union)
+print("🔹 Intersection A ∩ B:", intersection)
+print("🔹 Complement A':", complement_A)
+print("🔹 Difference A - B:", difference)
+
+# Create fuzzy relations via cartesian product
+R1 = cartesian_product(A, B)
+R2 = cartesian_product(B, A)
+
+# Show fuzzy relation R1 as a DataFrame
+print("\n📋 Fuzzy Relation R1 (A × B):")
+df_R1 = pd.DataFrame(index=A.keys(), columns=B.keys())
+for (x, y), val in R1.items():
+    df_R1.loc[x, y] = round(val, 2)
+display(df_R1.fillna('-'))
+
+# Show fuzzy relation R2 as a DataFrame
+print("\n📋 Fuzzy Relation R2 (B × A):")
+df_R2 = pd.DataFrame(index=B.keys(), columns=A.keys())
+for (x, y), val in R2.items():
+    df_R2.loc[x, y] = round(val, 2)
+display(df_R2.fillna('-'))
+
+# Perform Max-Min Composition
+composition = max_min_composition(R1, R2)
+
+# Show composition as a matrix
+print("\n🔁 Max-Min Composition (R1 ○ R2):")
+composition_df = pd.DataFrame(index=A.keys(), columns=A.keys())
+for (x, z), val in composition.items():
+    composition_df.loc[x, z] = round(val, 2)
+display(composition_df.fillna('-'))
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Write code to simulate requests coming from clients and distribute them among the servers using the load balancing algorithms.
+
+import random
+
+# Define servers with weights and active connections
+servers = [
+    {'name': 'Server1', 'weight': 2, 'connections': 0},
+    {'name': 'Server2', 'weight': 1, 'connections': 0},
+    {'name': 'Server3', 'weight': 3, 'connections': 0},
+]
+
+# Simulate client requests
+requests = ['Request' + str(i) for i in range(1, 11)]  # 10 client requests
+
+# ---------- Round Robin ----------
+print("----- Round Robin Load Balancing -----")
+server_index = 0
+for req in requests:
+    assigned_server = servers[server_index]['name']
+    print(f"{req} --> {assigned_server}")
+    server_index = (server_index + 1) % len(servers)
+
+# ---------- Random Selection ----------
+print("\n----- Random Selection Load Balancing -----")
+for req in requests:
+    assigned_server = random.choice(servers)['name']
+    print(f"{req} --> {assigned_server}")
+
+# ---------- Weighted Round Robin ----------
+print("\n----- Weighted Round Robin Load Balancing -----")
+# Expand servers list based on weights
+weighted_servers = []
+for server in servers:
+    weighted_servers.extend([server['name']] * server['weight'])
+
+server_index = 0
+for req in requests:
+    assigned_server = weighted_servers[server_index]
+    print(f"{req} --> {assigned_server}")
+    server_index = (server_index + 1) % len(weighted_servers)
+
+# ---------- Least Connections ----------
+print("\n----- Least Connections Load Balancing -----")
+# Reset connections
+for server in servers:
+    server['connections'] = 0
+
+for req in requests:
+    # Find server with least connections
+    least_conn_server = min(servers, key=lambda s: s['connections'])
+    least_conn_server['connections'] += 1  # Add one connection
+    print(f"{req} --> {least_conn_server['name']}")
+
+# Show final connection counts
+print("\nFinal connections per server:")
+for server in servers:
+    print(f"{server['name']}: {server['connections']} connections")
+
+#OR#############OPTIONAL#######################
+
+import random
+import threading
+import time
+import matplotlib.pyplot as plt
+
+# Define servers with weights and active connections
+servers = [
+    {'name': 'Server1', 'weight': 2, 'connections': 0, 'handled': 0},
+    {'name': 'Server2', 'weight': 1, 'connections': 0, 'handled': 0},
+    {'name': 'Server3', 'weight': 3, 'connections': 0, 'handled': 0},
+]
+
+# Simulate client requests
+requests = ['Request' + str(i) for i in range(1, 21)]  # 20 client requests
+
+# Simulate random processing time (1-3 seconds)
+def process_request(server, req):
+    server['connections'] += 1
+    server['handled'] += 1
+    print(f"{req} --> {server['name']} (processing...)")
+    time.sleep(random.uniform(1, 3))  # simulate work
+    server['connections'] -= 1
+    print(f"{req} --> {server['name']} (completed)")
+
+# ---------- Least Connections with Threading ----------
+print("\n----- Least Connections Load Balancing with Threads -----")
+threads = []
+
+for req in requests:
+    # Find server with least connections
+    least_conn_server = min(servers, key=lambda s: s['connections'])
+    t = threading.Thread(target=process_request, args=(least_conn_server, req))
+    threads.append(t)
+    t.start()
+
+# Wait for all threads to finish
+for t in threads:
+    t.join()
+
+# Show final request handling count
+print("\nFinal handled requests per server:")
+for server in servers:
+    print(f"{server['name']}: {server['handled']} requests")
+
+# ---------- Plotting ----------
+server_names = [server['name'] for server in servers]
+handled_counts = [server['handled'] for server in servers]
+
+plt.bar(server_names, handled_counts, color=['blue', 'green', 'orange'])
+plt.title('Requests Handled by Each Server')
+plt.xlabel('Server')
+plt.ylabel('Number of Requests')
+plt.show()
+
+_________________------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Optimization of Genetic Algorithm Parameters in Hybrid Genetic Algorithm-Neural Network Modeling: Application to Spray Drying of Coconut Milk
+
+#!pip install deap
+
+import random
+from deap import base, creator, tools, algorithms
+ 
+# Define evaluation function (this is a mock function, replace this with your actual evaluation function)
+def evaluate(individual):
+    # Here 'individual' represents the parameters for the neural network
+    # You'll need to replace this with your actual evaluation function that trains the neural network and evaluates its performance
+    # Return a fitness value (here, a random number is used as an example)
+    return random.random(),
+ 
+# Define genetic algorithm parameters
+POPULATION_SIZE = 10
+GENERATIONS = 5
+ 
+# Create types for fitness and individuals in the genetic algorithm
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMin)
+ 
+# Initialize toolbox
+toolbox = base.Toolbox()
+ 
+# Define attributes and individuals
+toolbox.register("attr_neurons", random.randint, 1, 100)  # Example: number of neurons
+toolbox.register("attr_layers", random.randint, 1, 5)  # Example: number of layers
+toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.attr_neurons, toolbox.attr_layers), n=1)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+ 
+# Genetic operators
+toolbox.register("evaluate", evaluate)
+toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mutate", tools.mutUniformInt, low=1, up=100, indpb=0.2)
+toolbox.register("select", tools.selTournament, tournsize=3)
+ 
+# Create initial population
+population = toolbox.population(n=POPULATION_SIZE)
+ 
+# Run the genetic algorithm
+for gen in range(GENERATIONS):
+    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+    
+    fitnesses = toolbox.map(toolbox.evaluate, offspring)
+    for ind, fit in zip(offspring, fitnesses):
+        ind.fitness.values = fit
+    
+    population = toolbox.select(offspring, k=len(population))
+ 
+# Get the best individual from the final population
+best_individual = tools.selBest(population, k=1)[0]
+best_params = best_individual
+ 
+# Print the best parameters found
+print("Best Parameters:", best_params)
+
+#OR##############################
+
+import numpy as np
+from sklearn.neural_network import MLPRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import random
+
+# ------------------------------
+# 1. Create a simple synthetic dataset
+# ------------------------------
+# Let's simulate some spray drying data:
+# Inputs: inlet_temp, feed_rate, maltodextrin_pct, atomization_pressure
+# Output: moisture_content (target variable)
+
+np.random.seed(42)  # for reproducible results
+
+# Generate 200 samples
+n_samples = 200
+inlet_temp = np.random.uniform(150, 200, n_samples)           # degrees Celsius
+feed_rate = np.random.uniform(5, 15, n_samples)               # mL/min
+maltodextrin = np.random.uniform(0, 20, n_samples)            # percent
+atom_pressure = np.random.uniform(1, 3, n_samples)            # bar
+
+# Simulated target with some noise
+moisture = (
+    50
+    - 0.1 * inlet_temp
+    + 0.5 * feed_rate
+    + 0.2 * maltodextrin
+    - 2 * atom_pressure
+    + np.random.normal(0, 1, n_samples)  # noise
+)
+
+# Stack inputs into a feature matrix
+X = np.column_stack([inlet_temp, feed_rate, maltodextrin, atom_pressure])
+y = moisture
+
+# Split into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+# ------------------------------
+# 2. Define the GA components
+# ------------------------------
+# We're optimizing:
+# - number of hidden neurons (5 to 20)
+# - learning rate (0.0001 to 0.01)
+# - mutation rate (0.01 to 0.3)
+# - crossover rate (0.5 to 0.9)
+
+POP_SIZE = 10
+N_GENERATIONS = 5
+
+# Helper to create a random individual
+def create_individual():
+    return {
+        'hidden_neurons': random.randint(5, 20),
+        'learning_rate': random.uniform(0.0001, 0.01),
+        'mutation_rate': random.uniform(0.01, 0.3),
+        'crossover_rate': random.uniform(0.5, 0.9),
+    }
+
+# Fitness: lower MSE is better
+def fitness(ind):
+    # Create the neural network with given hyperparameters
+    model = MLPRegressor(
+        hidden_layer_sizes=(ind['hidden_neurons'],),
+        learning_rate_init=ind['learning_rate'],
+        max_iter=200,
+        random_state=1
+    )
+    # Train
+    model.fit(X_train, y_train)
+    # Predict
+    preds = model.predict(X_test)
+    # Compute mean squared error
+    mse = mean_squared_error(y_test, preds)
+    return mse
+
+# Selection: tournament selection
+def tournament_selection(pop, scores, k=3):
+    selected = random.sample(list(zip(pop, scores)), k)
+    selected.sort(key=lambda x: x[1])  # sort by fitness (mse)
+    return selected[0][0]  # return individual with best fitness
+
+# Crossover: single-point on our dict values
+def crossover(parent1, parent2, rate):
+    child1, child2 = parent1.copy(), parent2.copy()
+    if random.random() < rate:
+        # swap hidden_neurons and learning_rate
+        child1['hidden_neurons'], child2['hidden_neurons'] = parent2['hidden_neurons'], parent1['hidden_neurons']
+        child1['learning_rate'], child2['learning_rate'] = parent2['learning_rate'], parent1['learning_rate']
+    return child1, child2
+
+# Mutation: tweak each parameter slightly
+def mutate(ind, rate):
+    if random.random() < rate:
+        ind['hidden_neurons'] = random.randint(5, 20)
+    if random.random() < rate:
+        ind['learning_rate'] = random.uniform(0.0001, 0.01)
+    if random.random() < rate:
+        ind['mutation_rate'] = random.uniform(0.01, 0.3)
+    # Note: we generally don't mutate crossover_rate here for simplicity
+    return ind
+
+# ------------------------------
+# 3. Run the GA
+# ------------------------------
+# Initialize population
+population = [create_individual() for _ in range(POP_SIZE)]
+
+for gen in range(N_GENERATIONS):
+    # Evaluate fitness for each individual
+    fitness_scores = [fitness(ind) for ind in population]
+    
+    # Print best fitness this generation
+    best_idx = np.argmin(fitness_scores)
+    print(f"Generation {gen}: Best MSE = {fitness_scores[best_idx]:.4f}")
+    
+    # Create new population
+    new_pop = []
+    while len(new_pop) < POP_SIZE:
+        # Select parents
+        p1 = tournament_selection(population, fitness_scores)
+        p2 = tournament_selection(population, fitness_scores)
+        # Crossover
+        c1, c2 = crossover(p1, p2, p1['crossover_rate'])
+        # Mutate
+        c1 = mutate(c1, c1['mutation_rate'])
+        c2 = mutate(c2, c2['mutation_rate'])
+        new_pop.extend([c1, c2])
+    population = new_pop[:POP_SIZE]  # keep population size constant
+
+# After final generation, print the best solution
+final_scores = [fitness(ind) for ind in population]
+best_idx = np.argmin(final_scores)
+best_ind = population[best_idx]
+print("\nBest hyperparameters found:")
+print(best_ind)
+print(f"With MSE = {final_scores[best_idx]:.4f}")
+
+__________-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Implementation of Clonal selection algorithm using Python
+
+import random
+
+# --- Problem setup ---
+# Define a target bit‑string (the “antigen”) we want to match
+ANTIGEN = [1, 0, 1, 1, 0, 1, 0, 0]
+
+# CSA parameters
+POP_SIZE    = 10    # number of antibodies in the population
+N_GENERATIONS = 5   # how many iterations to run
+CLONE_FACTOR  = 2   # base number of clones per unit of affinity
+MUTATION_RATE = 0.1 # chance to flip each bit in a clone
+
+# --- Helper functions ---
+def random_antibody(length):
+    """Make a random bit‑string of given length."""
+    return [random.choice([0,1]) for _ in range(length)]
+
+def affinity(ab):
+    """Affinity = number of matching bits to the antigen."""
+    return sum(1 for bit_ab, bit_ag in zip(ab, ANTIGEN) if bit_ab == bit_ag)
+
+def mutate(ab):
+    """Flip each bit with probability = MUTATION_RATE."""
+    return [
+        (1-bit if random.random() < MUTATION_RATE else bit)
+        for bit in ab
+    ]
+
+# --- Initialize population ---
+population = [random_antibody(len(ANTIGEN)) for _ in range(POP_SIZE)]
+
+# --- Main CSA loop ---
+for gen in range(1, N_GENERATIONS+1):
+    # 1. Evaluate affinity of each antibody
+    scores = [(affinity(ab), ab) for ab in population]
+    scores.sort(reverse=True, key=lambda x: x[0])  # highest affinity first
+
+    # Print best score this generation
+    best_score, best_ab = scores[0]
+    print(f"Gen {gen}: Best affinity = {best_score}/{len(ANTIGEN)}  {best_ab}")
+
+    # 2. Select top half for cloning
+    n_select = POP_SIZE // 2
+    selected = [ab for (_, ab) in scores[:n_select]]
+
+    # 3. Clone and hypermutate
+    clones = []
+    for ab in selected:
+        n_clones = CLONE_FACTOR * affinity(ab)
+        for _ in range(n_clones):
+            clone = mutate(ab.copy())
+            clones.append(clone)
+
+    # 4. Re‑evaluate clones and pick the best to form new population
+    clone_scores = [(affinity(c), c) for c in clones]
+    # Fill new population with best clones; if too few, pad with random
+    clone_scores.sort(reverse=True, key=lambda x: x[0])
+    new_pop = [c for (_, c) in clone_scores[:POP_SIZE]]
+
+    # If we lost diversity, inject some new random antibodies
+    while len(new_pop) < POP_SIZE:
+        new_pop.append(random_antibody(len(ANTIGEN)))
+
+    population = new_pop
+
+# --- Final result ---
+final_scores = [(affinity(ab), ab) for ab in population]
+final_scores.sort(reverse=True, key=lambda x: x[0])
+best_final, best_ab_final = final_scores[0]
+print("\nFinal best match:")
+print(f"Affinity = {best_final}/{len(ANTIGEN)}  Antibody = {best_ab_final}")
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Applying Artificial Immune Pattern Recognition for Structure Damage Classification
+
+import numpy as np
+ 
+# Generate dummy data for demonstration purposes (replace this with your actual data)
+def generate_dummy_data(samples=100, features=10):
+    data = np.random.rand(samples, features)
+    labels = np.random.randint(0, 2, size=samples)
+    return data, labels
+ 
+# Define the AIRS algorithm
+class AIRS:
+    def __init__(self, num_detectors=10, hypermutation_rate=0.1):
+        self.num_detectors = num_detectors
+        self.hypermutation_rate = hypermutation_rate
+ 
+    def train(self, X, y):
+        self.detectors = X[np.random.choice(len(X), self.num_detectors, replace=False)]
+ 
+    def predict(self, X):
+        predictions = []
+        for sample in X:
+            distances = np.linalg.norm(self.detectors - sample, axis=1)
+            prediction = int(np.argmin(distances))
+            predictions.append(prediction)
+        return predictions
+ 
+# Generate dummy data
+data, labels = generate_dummy_data()
+ 
+# Split data into training and testing sets
+split_ratio = 0.8
+split_index = int(split_ratio * len(data))
+train_data, test_data = data[:split_index], data[split_index:]
+train_labels, test_labels = labels[:split_index], labels[split_index:]
+ 
+# Initialize and train AIRS
+airs = AIRS(num_detectors=10, hypermutation_rate=0.1)
+airs.train(train_data, train_labels)
+ 
+# Test AIRS on the test set
+predictions = airs.predict(test_data)
+ 
+# Evaluate accuracy
+accuracy = float(np.mean(predictions == test_labels))
+print(f"Accuracy: {accuracy}")
+
+#OR#################################
+
+import numpy as np
+import random
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+
+# --- 1. Create a simple synthetic dataset ---
+# Let's simulate a 2D feature vector for each measurement:
+#   feature_1 and feature_2 could be e.g. vibration amplitudes
+N_SAMPLES = 200
+# Healthy (self) cluster around (2,2), damaged (non-self) around (5,5)
+healthy = np.random.normal(loc=2.0, scale=0.5, size=(N_SAMPLES//2, 2))
+damaged = np.random.normal(loc=5.0, scale=0.5, size=(N_SAMPLES//2, 2))
+
+X = np.vstack([healthy, damaged])
+y = np.array([0]*(N_SAMPLES//2) + [1]*(N_SAMPLES//2))  # 0=healthy, 1=damaged
+
+# Split into train (to generate detectors) and test (to classify)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1)
+
+# --- 2. Negative Selection: generate detectors ---
+# A detector is a random point in feature space that is > threshold from all self samples.
+SELF = X_train[y_train == 0]
+DETECTOR_COUNT = 50
+THRESHOLD = 1.0   # minimum Euclidean distance from any self-sample
+
+def generate_detector():
+    """Create one detector that doesn't match any healthy (self) pattern."""
+    while True:
+        # sample uniformly in the overall feature range
+        candidate = np.random.uniform(low=X.min(axis=0), high=X.max(axis=0))
+        # compute distances to all self samples
+        dists = np.linalg.norm(SELF - candidate, axis=1)
+        if np.all(dists > THRESHOLD):
+            return candidate
+
+# build the detector set
+detectors = np.array([generate_detector() for _ in range(DETECTOR_COUNT)])
+
+# --- 3. Classification function ---
+def classify(sample):
+    """If any detector is within THRESHOLD of sample ⇒ flagged as damaged (1)."""
+    dists = np.linalg.norm(detectors - sample, axis=1)
+    return 1 if np.any(dists < THRESHOLD) else 0
+
+# --- 4. Evaluate on test set ---
+y_pred = np.array([classify(x) for x in X_test])
+
+print(classification_report(y_test, y_pred, target_names=['Healthy','Damaged']))
+
+____-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Implement DEAP (Distributed Evolutionary Algorithms) using Python.
+
+import random
+from deap import base, creator, tools, algorithms
+ 
+# Define the evaluation function (minimize a simple mathematical function)
+def eval_func(individual):
+    # Example evaluation function (minimize a quadratic function)
+    return sum(x ** 2 for x in individual),
+ 
+# DEAP setup
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMin)
+ 
+toolbox = base.Toolbox()
+ 
+# Define attributes and individuals
+toolbox.register("attr_float", random.uniform, -5.0, 5.0)  # Example: Float values between -5 and 5
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=3)  # Example: 3-dimensional individual
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+ 
+# Evaluation function and genetic operators
+toolbox.register("evaluate", eval_func)
+toolbox.register("mate", tools.cxBlend, alpha=0.5)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
+toolbox.register("select", tools.selTournament, tournsize=3)
+ 
+# Create population
+population = toolbox.population(n=50)
+ 
+# Genetic Algorithm parameters
+generations = 20
+ 
+# Run the algorithm
+for gen in range(generations):
+    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+    
+    fits = toolbox.map(toolbox.evaluate, offspring)
+    for fit, ind in zip(fits, offspring):
+        ind.fitness.values = fit
+    
+    population = toolbox.select(offspring, k=len(population))
+ 
+# Get the best individual after generations
+best_ind = tools.selBest(population, k=1)[0]
+best_fitness = best_ind.fitness.values[0]
+ 
+print("Best individual:", best_ind)
+print("Best fitness:", best_fitness)
+
+#OR#######################################
+
+# Simple DEAP example: evolve a population to maximize f(x) = x^2
+
+import random
+from deap import base, creator, tools, algorithms
+
+# 1. Define the problem: maximize fitness (so we use weights=(1.0,))
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+#    An individual is simply a list with one float (our x)
+creator.create("Individual", list, fitness=creator.FitnessMax)
+
+toolbox = base.Toolbox()
+
+# 2. Attribute generator: random float between -5 and 5
+toolbox.register("attr_float", random.uniform, -5.0, 5.0)
+# 3. Structure initializers: individuals and population
+toolbox.register("individual", tools.initRepeat, creator.Individual,
+                 toolbox.attr_float, n=1)   # one gene per individual
+toolbox.register("population", tools.initRepeat, list,
+                 toolbox.individual)
+
+# 4. Define the evaluation function: f(x) = x^2
+def evalQuadratic(individual):
+    x = individual[0]
+    return (x*x,)  # DEAP expects fitness as a tuple
+
+toolbox.register("evaluate", evalQuadratic)
+# 5. Genetic operators
+toolbox.register("mate", tools.cxBlend, alpha=0.5)      # blend crossover
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=1.0)
+toolbox.register("select", tools.selTournament, tournsize=3)
+
+def main():
+    random.seed(42)
+    pop = toolbox.population(n=10)
+
+    # statistics to track (fixed)
+    stats = tools.Statistics(lambda ind: ind.fitness.values[0])
+    stats.register("avg", lambda fits: sum(fits)/len(fits))
+    stats.register("max", max)
+
+    pop, logbook = algorithms.eaSimple(pop, toolbox,
+                                       cxpb=0.7, mutpb=0.2,
+                                       ngen=5, stats=stats,
+                                       verbose=True)
+
+    best_ind = tools.selBest(pop, 1)[0]
+    print(f"\nBest individual: x = {best_ind[0]:.3f}, f(x) = {best_ind.fitness.values[0]:.3f}")
+
+if __name__ == "__main__":
+    main()
+
+_----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Implement Ant colony optimization by solving the Traveling salesman problem using python
+Problem statement- A salesman needs to visit a set of cities exactly once and return to the original city. The task is to find the shortest possible route that the salesman can take to visit all the cities and return to the starting city
+
+import numpy as np
+import random
+ # Define the distance matrix (distances between cities)
+# Replace this with your distance matrix or generate one based on your problem
+# Example distance matrix (replace this with your actual data)
+distance_matrix = np.array([
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+])
+ # Parameters for Ant Colony Optimization
+num_ants = 10
+num_iterations = 50
+evaporation_rate = 0.5
+pheromone_constant = 1.0
+heuristic_constant = 1.0
+ # Initialize pheromone matrix and visibility matrix
+num_cities = len(distance_matrix)
+pheromone = np.ones((num_cities, num_cities))  # Pheromone matrix
+visibility = 1 / distance_matrix  # Visibility matrix (inverse of distance)
+ 
+# ACO algorithm
+for iteration in range(num_iterations):
+    ant_routes = []
+    for ant in range(num_ants):
+        current_city = random.randint(0, num_cities - 1)
+        visited_cities = [current_city]
+        route = [current_city]
+        
+        while len(visited_cities) < num_cities:
+            probabilities = []
+            for city in range(num_cities):
+                if city not in visited_cities:
+                    pheromone_value = pheromone[current_city][city]
+                    visibility_value = visibility[current_city][city]
+                    probability = (pheromone_value ** pheromone_constant) * (visibility_value ** heuristic_constant)
+                    probabilities.append((city, probability))
+            
+            probabilities = sorted(probabilities, key=lambda x: x[1], reverse=True)
+            selected_city = probabilities[0][0]
+            route.append(selected_city)
+            visited_cities.append(selected_city)
+            current_city = selected_city
+        
+        ant_routes.append(route)
+    
+    # Update pheromone levels
+    delta_pheromone = np.zeros((num_cities, num_cities))
+    for ant, route in enumerate(ant_routes):
+        for i in range(len(route) - 1):
+            city_a = route[i]
+            city_b = route[i + 1]
+            delta_pheromone[city_a][city_b] += 1 / distance_matrix[city_a][city_b]
+            delta_pheromone[city_b][city_a] += 1 / distance_matrix[city_a][city_b]
+    
+    pheromone = (1 - evaporation_rate) * pheromone + delta_pheromone
+ 
+# Find the best route
+best_route_index = np.argmax([sum(distance_matrix[cities[i]][cities[(i + 1) % num_cities]] for i in range(num_cities)) for cities in ant_routes])
+best_route = ant_routes[best_route_index]
+shortest_distance = sum(distance_matrix[best_route[i]][best_route[(i + 1) % num_cities]] for i in range(num_cities))
+ 
+print("Best route:", best_route)
+print("Shortest distance:", shortest_distance)
+
+#OR####################
+
+import numpy as np
+import random
+
+# --- 1. Problem setup: city coordinates ---
+cities = np.array([
+    [0, 0],
+    [1, 5],
+    [5, 2],
+    [6, 6],
+    [8, 3]
+])
+n_cities = len(cities)
+
+# Precompute distance matrix
+dist = np.zeros((n_cities, n_cities))
+for i in range(n_cities):
+    for j in range(n_cities):
+        dist[i, j] = np.linalg.norm(cities[i] - cities[j])
+
+# --- 2. ACO parameters ---
+n_ants       = 10      # how many ants build tours each iteration
+n_iters      = 50      # number of iterations
+alpha        = 1.0     # pheromone importance
+beta         = 5.0     # distance importance (heuristic)
+evap_rate    = 0.5     # pheromone evaporation rate
+Q            = 100     # pheromone deposit factor
+
+# Initialize pheromone levels to a small constant
+pheromone = np.ones((n_cities, n_cities)) * 0.1
+
+# --- 3. Helper: choose next city for an ant ---
+def select_next_city(current, unvisited, pheromone, dist):
+    # Compute probabilities ∝ (pheromone^alpha) * (1/distance^beta)
+    pher = pheromone[current][unvisited] ** alpha
+    heuristic = (1.0 / (dist[current][unvisited] + 1e-6)) ** beta
+    probs = pher * heuristic
+    probs /= probs.sum()
+    # Roulette-wheel selection
+    return random.choices(unvisited, weights=probs)[0]
+
+# --- 4. Main ACO loop ---
+best_tour = None
+best_length = np.inf
+
+for iteration in range(n_iters):
+    all_tours = []
+    all_lengths = []
+
+    # Each ant constructs a tour
+    for ant in range(n_ants):
+        start = random.randrange(n_cities)
+        tour = [start]
+        unvisited = set(range(n_cities)) - {start}
+
+        # Build the rest of the tour
+        while unvisited:
+            next_city = select_next_city(tour[-1], list(unvisited), pheromone, dist)
+            tour.append(next_city)
+            unvisited.remove(next_city)
+
+        # Return to start
+        tour.append(start)
+        all_tours.append(tour)
+
+        # Compute tour length
+        length = sum(dist[tour[i]][tour[i+1]] for i in range(len(tour)-1))
+        all_lengths.append(length)
+
+        # Track global best
+        if length < best_length:
+            best_length = length
+            best_tour = tour
+
+    # Evaporate pheromone
+    pheromone *= (1 - evap_rate)
+
+    # Deposit pheromone along each ant’s tour
+    for tour, length in zip(all_tours, all_lengths):
+        deposit = Q / length
+        for i in range(len(tour)-1):
+            a, b = tour[i], tour[i+1]
+            pheromone[a][b] += deposit
+            pheromone[b][a] += deposit  # symmetric TSP
+
+    # (Optional) print progress
+    print(f"Iter {iteration+1:02d}: best length = {best_length:.3f}")
+
+# --- 5. Output best found tour ---
+print("\nBest tour found:")
+print(" -> ".join(str(city) for city in best_tour))
+print(f"Total distance: {best_length:.3f}")
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Create and Art with Neural style transfer on given image using deep learning.
+
+import torch
+from torchvision import models, transforms
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Load image and preprocess
+def load_img(path):
+    img = Image.open(path).convert('RGB')
+    transform = transforms.Compose([
+        transforms.Resize((300, 300)),
+        transforms.ToTensor()
+    ])
+    return transform(img).unsqueeze(0)
+
+# Show image
+def show_img(tensor, title):
+    img = tensor.squeeze().detach().cpu().permute(1, 2, 0).clamp(0, 1)
+    plt.imshow(img)
+    plt.title(title)
+    plt.axis('off')
+    plt.show()
+
+# Load content and style images
+content = load_img('content.jpg')
+style = load_img('style.jpg')
+
+# Use GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+content = content.to(device)
+style = style.to(device)
+
+# Load pre-trained VGG19 model (suppress deprecation warning)
+from torchvision.models import vgg19, VGG19_Weights
+vgg = vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features.to(device).eval()
+
+# Function to extract features
+def get_features(x, layers):
+    feats = {}
+    for name, layer in vgg._modules.items():
+        x = layer(x)
+        if name in layers:
+            feats[name] = x
+    return feats
+
+# Gram matrix function
+def gram(x):
+    b, c, h, w = x.size()
+    x = x.view(c, h * w)
+    return torch.mm(x, x.t())
+
+# Specify layers for content and style
+content_layer = ['21']
+style_layers = ['0', '5', '10', '19', '28']
+
+# Extract and detach features
+c_feats = {k: v.detach() for k, v in get_features(content, content_layer).items()}
+s_feats = get_features(style, style_layers)
+s_grams = {l: gram(s_feats[l]).detach() for l in style_layers}
+
+# Initialize target image
+target = content.clone().requires_grad_(True)
+
+# Optimizer
+opt = torch.optim.Adam([target], lr=0.01)
+
+# Style transfer loop
+for step in range(201):
+    t_feats = get_features(target, content_layer + style_layers)
+
+    # Content loss
+    c_loss = torch.mean((t_feats['21'] - c_feats['21']) ** 2)
+
+    # Style loss
+    s_loss = 0
+    for l in style_layers:
+        target_gram = gram(t_feats[l])
+        style_gram = s_grams[l]
+        s_loss += torch.mean((target_gram - style_gram) ** 2)
+
+    # Total loss
+    loss = c_loss + 1e6 * s_loss
+
+    # Backpropagation
+    opt.zero_grad()
+    loss.backward()
+    opt.step()
+
+    # Clamp to keep image values in range
+    with torch.no_grad():
+        target.clamp_(0, 1)
+
+    # Display progress
+    if step % 50 == 0:
+        print(f"Step {step}, Loss: {loss.item():.4f}")
+        show_img(target, f"Step {step}")
+
+# Final result
+show_img(target, "Final Stylized Image")
+
+
